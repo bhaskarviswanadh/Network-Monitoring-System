@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Devices - Network Monitor{% endblock %}
+
+{% block content %}
+<div class="top-bar">
+    <h1 class="page-title">Network Devices</h1>
+    <div class="top-bar-actions">
+        <div class="search-box">
+            <input type="text" placeholder="Search devices..." id="deviceSearch">
+        </div>
+        <a href="{{ url_for('add_switch') }}" class="btn btn-primary">+ Add Device</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">All Devices ({{ switches|length }})</h2>
+        <div style="display: flex; gap: 1rem;">
+            <span class="status-badge status-up">{{ switches|selectattr('status', 'equalto', 'up')|list|length }} Online</span>
+            <span class="status-badge status-down">{{ switches|selectattr('status', 'equalto', 'down')|list|length }} Offline</span>
+        </div>
+    </div>
+    
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Device Name</th>
+                <th>IP Address</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Last Seen</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="deviceTableBody">
+            {% for switch in switches %}
+            <tr>
+                <td>
+                    <div style="font-weight: 600;">{{ switch.name }}</div>
+                </td>
+                <td>
+                    <code style="background: rgba(0, 245, 255, 0.1); padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.85rem;">
+                        {{ switch.ip_address }}
+                    </code>
+                </td>
+                <td>{{ switch.device_type|replace('_', ' ')|title }}</td>
+                <td>
+                    <span class="status-badge status-{{ switch.status }}">
+                        {{ switch.status|upper }}
+                    </span>
+                </td>
+                <td>{{ switch.last_seen.strftime('%Y-%m-%d %H:%M:%S') if switch.last_seen else 'Never' }}</td>
+                <td>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <a href="{{ url_for('switch_detail', switch_id=switch.id) }}" class="btn btn-small">View</a>
+                        <form method="POST" action="{{ url_for('delete_switch', switch_id=switch.id) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Delete {{ switch.name }}?')">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('deviceSearch').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#deviceTableBody tr');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}

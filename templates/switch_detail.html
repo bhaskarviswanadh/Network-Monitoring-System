@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}{{ switch.name }} - Network Monitor{% endblock %}
+
+{% block content %}
+<h2>{{ switch.name }}</h2>
+
+<div class="switch-info">
+    <p><strong>IP Address:</strong> {{ switch.ip_address }}</p>
+    <p><strong>Device Type:</strong> {{ switch.device_type }}</p>
+    <p><strong>Status:</strong> <span class="status-badge status-{{ switch.status }}">{{ switch.status|upper }}</span></p>
+    <p><strong>Last Seen:</strong> {{ switch.last_seen.strftime('%Y-%m-%d %H:%M:%S') if switch.last_seen else 'Never' }}</p>
+</div>
+
+<div class="section">
+    <h3>Performance Metrics (Last 24 Hours)</h3>
+    <canvas id="metricsChart" width="800" height="300"></canvas>
+</div>
+
+<div class="section">
+    <h3>Recent Metrics</h3>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>CPU Usage</th>
+                <th>Memory Usage</th>
+                <th>Uptime</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for metric in metrics[:10] %}
+            <tr>
+                <td>{{ metric.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ metric.cpu_usage }}%</td>
+                <td>{{ metric.memory_usage }}%</td>
+                <td>{{ metric.uptime }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="section">
+    <h3>Alerts</h3>
+    {% if alerts %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Severity</th>
+                <th>Message</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for alert in alerts %}
+            <tr>
+                <td>{{ alert.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ alert.alert_type }}</td>
+                <td><span class="severity-{{ alert.severity }}">{{ alert.severity|upper }}</span></td>
+                <td>{{ alert.message }}</td>
+                <td>{{ 'Acknowledged' if alert.acknowledged else 'Active' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No alerts for this switch.</p>
+    {% endif %}
+</div>
+
+<a href="{{ url_for('switches') }}" class="btn">Back to Switches</a>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+fetch('/api/metrics/{{ switch.id }}')
+    .then(response => response.json())
+    .then(data => {
+        const ctx = document.getElementById('metricsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.timestamps.map(t => new Date(t).toLocaleTimeString()),
+                datasets: [{
+                    label: 'CPU Usage (%)',
+                    data: data.cpu,
+                    borderColor: 'rgb(255, 99, 132)',
+                    tension: 0.1
+                }, {
+                    label: 'Memory Usage (%)',
+                    data: data.memory,
+                    borderColor: 'rgb(54, 162, 235)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

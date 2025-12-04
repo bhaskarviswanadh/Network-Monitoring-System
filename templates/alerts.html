@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Alerts - Network Monitor{% endblock %}
+
+{% block content %}
+<div class="header-actions">
+    <h2>Alerts</h2>
+    <div>
+        <span class="stat-badge">Total: {{ alerts|length }}</span>
+        <span class="stat-badge status-active">Active: {{ alerts|selectattr('acknowledged', 'equalto', False)|list|length }}</span>
+    </div>
+</div>
+
+{% if alerts %}
+<div class="section">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Switch</th>
+                <th>Type</th>
+                <th>Severity</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for alert in alerts %}
+            <tr class="{% if not alert.acknowledged %}alert-active{% endif %}">
+                <td>{{ alert.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>
+                    <a href="{{ url_for('switch_detail', switch_id=alert.switch_id) }}">
+                        {{ alert.switch.name }}
+                    </a>
+                </td>
+                <td>{{ alert.alert_type|title }}</td>
+                <td><span class="severity-{{ alert.severity }}">{{ alert.severity|upper }}</span></td>
+                <td>{{ alert.message }}</td>
+                <td>
+                    {% if alert.acknowledged %}
+                        <span class="status-badge status-ack">Acknowledged</span>
+                    {% else %}
+                        <span class="status-badge status-active">Active</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if not alert.acknowledged %}
+                    <button class="btn btn-small" onclick="acknowledgeAlert({{ alert.id }})">Acknowledge</button>
+                    {% else %}
+                    <span style="color: #95a5a6;">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="section">
+    <p style="text-align: center; color: #7f8c8d; padding: 2rem;">
+        ✓ No alerts found. All systems are running smoothly.
+    </p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function acknowledgeAlert(alertId) {
+    if (!confirm('Mark this alert as acknowledged?')) {
+        return;
+    }
+    
+    fetch('/alert/' + alertId + '/acknowledge', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.status === 'success') {
+            location.reload();
+        } else {
+            alert('Failed to acknowledge alert');
+        }
+    })
+    .catch(function(error) {
+        console.error('Error:', error);
+        alert('An error occurred');
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Add Device - Network Monitor{% endblock %}
+
+{% block content %}
+<div class="top-bar">
+    <h1 class="page-title">Add New Device</h1>
+</div>
+
+<div class="card" style="max-width: 800px;">
+    <form method="POST">
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="name">Device Name</label>
+                <input type="text" id="name" name="name" placeholder="e.g., Main Building Switch" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="ip_address">IP Address</label>
+                <input type="text" id="ip_address" name="ip_address" placeholder="e.g., 192.168.1.1" required>
+            </div>
+        </div>
+        
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="username">SSH Username</label>
+                <input type="text" id="username" name="username" placeholder="admin" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">SSH Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="device_type">Device Type</label>
+            <select id="device_type" name="device_type">
+                <option value="cisco_ios">Cisco IOS</option>
+                <option value="cisco_nxos">Cisco NX-OS</option>
+                <option value="aruba_os">Aruba OS</option>
+                <option value="hp_procurve">HP ProCurve (Aruba)</option>
+                <option value="cambium">Cambium</option>
+                <option value="tplink">TP-Link</option>
+                <option value="dlink">D-Link</option>
+                <option value="generic">Generic/Other</option>
+            </select>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary">Add Device</button>
+            <a href="{{ url_for('switches') }}" class="btn">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

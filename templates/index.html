@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Network Monitor{% endblock %}
+
+{% block content %}
+<div class="top-bar">
+    <h1 class="page-title">Dashboard</h1>
+    <div class="top-bar-actions">
+        <div class="search-box">
+            <input type="text" placeholder="Search devices...">
+        </div>
+    </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-header">
+            <div>
+                <div class="stat-label">Total Devices</div>
+                <div class="stat-value">{{ total_switches }}</div>
+                <div class="stat-change positive">↑ All systems</div>
+            </div>
+            <div class="stat-icon">🖧</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <div>
+                <div class="stat-label">Online</div>
+                <div class="stat-value" style="color: var(--accent-success);">{{ up_switches }}</div>
+                <div class="stat-change positive">↑ {{ ((up_switches / total_switches * 100) if total_switches > 0 else 0)|round(1) }}% uptime</div>
+            </div>
+            <div class="stat-icon" style="background: rgba(0, 255, 136, 0.1); border-color: rgba(0, 255, 136, 0.2);">✓</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <div>
+                <div class="stat-label">Offline</div>
+                <div class="stat-value" style="color: var(--accent-danger);">{{ down_switches }}</div>
+                <div class="stat-change {% if down_switches > 0 %}negative{% else %}positive{% endif %}">
+                    {% if down_switches > 0 %}↓ Needs attention{% else %}✓ All good{% endif %}
+                </div>
+            </div>
+            <div class="stat-icon" style="background: rgba(255, 51, 102, 0.1); border-color: rgba(255, 51, 102, 0.2);">⚠</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-header">
+            <div>
+                <div class="stat-label">Active Alerts</div>
+                <div class="stat-value" style="color: var(--accent-warning);">{{ alerts|length }}</div>
+                <div class="stat-change {% if alerts|length > 0 %}negative{% else %}positive{% endif %}">
+                    {% if alerts|length > 0 %}↑ Requires review{% else %}✓ No issues{% endif %}
+                </div>
+            </div>
+            <div class="stat-icon" style="background: rgba(255, 184, 0, 0.1); border-color: rgba(255, 184, 0, 0.2);">🔔</div>
+        </div>
+    </div>
+</div>
+
+<!-- Device Cards -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Network Devices</h2>
+        <a href="{{ url_for('add_switch') }}" class="btn btn-primary btn-small">+ Add Device</a>
+    </div>
+    
+    <div class="device-grid">
+        {% for switch in switches[:8] %}
+        <div class="device-card">
+            <div class="device-header">
+                <div>
+                    <div class="device-name">{{ switch.name }}</div>
+                    <div class="device-ip">{{ switch.ip_address }}</div>
+                </div>
+                <span class="status-badge status-{{ switch.status }}">{{ switch.status|upper }}</span>
+            </div>
+            
+            <div class="device-metrics">
+                <div class="metric-item">
+                    <div class="metric-label">Device Type</div>
+                    <div class="metric-value" style="font-size: 0.9rem;">{{ switch.device_type|replace('_', ' ')|title }}</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-label">Last Seen</div>
+                    <div class="metric-value" style="font-size: 0.9rem;">
+                        {% if switch.last_seen %}
+                            {{ switch.last_seen.strftime('%H:%M') }}
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <a href="{{ url_for('switch_detail', switch_id=switch.id) }}" class="btn btn-small" style="width: 100%; margin-top: 1rem; justify-content: center;">View Details</a>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if switches|length > 8 %}
+    <div style="text-align: center; margin-top: 1.5rem;">
+        <a href="{{ url_for('switches') }}" class="btn">View All Devices ({{ switches|length }})</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Recent Alerts -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Recent Alerts</h2>
+        <a href="{{ url_for('alerts') }}" class="btn btn-small">View All</a>
+    </div>
+    
+    {% if alerts %}
+        {% for alert in alerts[:5] %}
+        <div class="alert-item {% if alert.severity == 'warning' %}warning{% elif alert.severity == 'info' %}info{% endif %}">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                <div>
+                    <strong>{{ alert.switch.name }}</strong>
+                    <span class="severity-{{ alert.severity }}" style="margin-left: 0.5rem;">{{ alert.severity|upper }}</span>
+                </div>
+                <span style="color: var(--text-secondary); font-size: 0.85rem;">{{ alert.timestamp.strftime('%H:%M:%S') }}</span>
+            </div>
+            <div style="color: var(--text-secondary);">{{ alert.message }}</div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+            ✓ No active alerts. All systems operating normally.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
