@@ -132,7 +132,15 @@ def logs():
 @app.route('/settings')
 def settings():
     """Settings page"""
-    return render_template('settings.html')
+    # Get current config values
+    current_settings = {
+        'enable_email': Config.ENABLE_EMAIL_ALERTS,
+        'smtp_server': Config.SMTP_SERVER,
+        'smtp_port': Config.SMTP_PORT,
+        'smtp_username': Config.SMTP_USERNAME,
+        'alert_emails': ', '.join(Config.ALERT_EMAIL_TO)
+    }
+    return render_template('settings.html', settings=current_settings)
 
 @app.route('/settings', methods=['POST'])
 def update_settings():

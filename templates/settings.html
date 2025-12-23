@@ -46,7 +46,7 @@
         <form id="emailSettings">
             <div class="form-group">
                 <div style="display: flex; align-items: center; gap: 0.8rem; padding: 1rem; background: rgba(0, 245, 255, 0.05); border: 1px solid rgba(0, 245, 255, 0.2); border-radius: 8px;">
-                    <input type="checkbox" id="enable_email" name="enable_email" checked 
+                    <input type="checkbox" id="enable_email" name="enable_email" {{ 'checked' if settings.enable_email else '' }}
                            style="width: 18px; height: 18px; accent-color: var(--accent-primary); cursor: pointer;">
                     <label for="enable_email" style="margin: 0; cursor: pointer; font-weight: 600; color: var(--text-primary);">
                         Enable Email Alerts
@@ -59,22 +59,22 @@
             
             <div class="form-group">
                 <label for="smtp_server">SMTP Server</label>
-                <input type="text" id="smtp_server" name="smtp_server" value="smtp.gmail.com">
+                <input type="text" id="smtp_server" name="smtp_server" value="{{ settings.smtp_server or 'smtp.gmail.com' }}">
             </div>
             
             <div class="form-group">
                 <label for="smtp_port">SMTP Port</label>
-                <input type="number" id="smtp_port" name="smtp_port" value="587">
+                <input type="number" id="smtp_port" name="smtp_port" value="{{ settings.smtp_port or 587 }}">
             </div>
             
             <div class="form-group">
                 <label for="smtp_username">Gmail Address</label>
-                <input type="email" id="smtp_username" name="smtp_username" value="viswanathdevisetti789@gmail.com">
+                <input type="email" id="smtp_username" name="smtp_username" value="{{ settings.smtp_username or '' }}" placeholder="your-email@gmail.com">
             </div>
             
             <div class="form-group">
                 <label for="smtp_password">Gmail App Password</label>
-                <input type="password" id="smtp_password" name="smtp_password" placeholder="Enter your Gmail App Password">
+                <input type="password" id="smtp_password" name="smtp_password" placeholder="Enter your Gmail App Password (leave blank to keep current)">
                 <small style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.3rem; display: block;">
                     Get App Password: Google Account → Security → 2-Step Verification → App passwords
                 </small>
@@ -82,7 +82,7 @@
             
             <div class="form-group">
                 <label for="alert_emails">Alert Recipients</label>
-                <input type="text" id="alert_emails" name="alert_emails" value="viswanathdevisetti789@gmail.com">
+                <input type="text" id="alert_emails" name="alert_emails" value="{{ settings.alert_emails or '' }}" placeholder="admin@college.edu, admin2@college.edu">
                 <small style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.3rem; display: block;">
                     Separate multiple emails with commas
                 </small>
