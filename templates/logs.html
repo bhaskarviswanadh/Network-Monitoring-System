@@ -32,7 +32,11 @@
                             {% elif log.alert_type == 'memory' %}💾
                             {% elif log.alert_type == 'interface' %}🌐
                             {% else %}📊{% endif %}
-                            {{ log.switch.name }}
+                            {% if log.switch_id %}
+                                {{ log.switch_ref.name }}
+                            {% else %}
+                                {{ log.switch_name }} (Deleted)
+                            {% endif %}
                         </span>
                         <span class="severity-{{ log.severity }}">{{ log.severity|upper }}</span>
                     </div>

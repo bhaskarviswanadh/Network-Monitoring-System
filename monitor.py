@@ -127,6 +127,8 @@ class NetworkMonitor:
         if not existing:
             alert = Alert(
                 switch_id=switch.id,
+                switch_name=switch.name,
+                switch_ip=switch.ip_address,
                 alert_type=alert_type,
                 severity=severity,
                 message=message

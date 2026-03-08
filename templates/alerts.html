@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block title %}Alerts - Network Monitor{% endblock %}
 
@@ -30,9 +30,13 @@
             <tr class="{% if not alert.acknowledged %}alert-active{% endif %}">
                 <td>{{ alert.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                 <td>
-                    <a href="{{ url_for('switch_detail', switch_id=alert.switch_id) }}">
-                        {{ alert.switch.name }}
-                    </a>
+                    {% if alert.switch_id %}
+                        <a href="{{ url_for('switch_detail', switch_id=alert.switch_id) }}">
+                            {{ alert.switch_ref.name }}
+                        </a>
+                    {% else %}
+                        {{ alert.switch_name }} (Deleted)
+                    {% endif %}
                 </td>
                 <td>{{ alert.alert_type|title }}</td>
                 <td><span class="severity-{{ alert.severity }}">{{ alert.severity|upper }}</span></td>
@@ -59,7 +63,7 @@
 {% else %}
 <div class="section">
     <p style="text-align: center; color: #7f8c8d; padding: 2rem;">
-        ✓ No alerts found. All systems are running smoothly.
+         No alerts found. All systems are running smoothly.
     </p>
 </div>
 {% endif %}

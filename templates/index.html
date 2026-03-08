@@ -123,7 +123,13 @@
         <div class="alert-item {% if alert.severity == 'warning' %}warning{% elif alert.severity == 'info' %}info{% endif %}">
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
                 <div>
-                    <strong>{{ alert.switch.name }}</strong>
+                    <strong>
+                        {% if alert.switch_id %}
+                            {{ alert.switch_ref.name }}
+                        {% else %}
+                            {{ alert.switch_name }} (Deleted)
+                        {% endif %}
+                    </strong>
                     <span class="severity-{{ alert.severity }}" style="margin-left: 0.5rem;">{{ alert.severity|upper }}</span>
                 </div>
                 <span style="color: var(--text-secondary); font-size: 0.85rem;">{{ alert.timestamp.strftime('%H:%M:%S') }}</span>

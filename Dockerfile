@@ -19,6 +19,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the entire application
 COPY . .
 
+# Verify templates are copied
+RUN ls -la templates/
+
 # Create directory for SQLite database
 RUN mkdir -p /app/instance
 

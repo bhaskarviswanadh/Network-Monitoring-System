@@ -15,6 +15,7 @@ class Switch(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     metrics = db.relationship('Metric', backref='switch', lazy=True, cascade='all, delete-orphan')
+    alerts = db.relationship('Alert', backref='switch_ref', lazy=True, foreign_keys='Alert.switch_id')
 
 class Metric(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -27,11 +28,11 @@ class Metric(db.Model):
     
 class Alert(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    switch_id = db.Column(db.Integer, db.ForeignKey('switch.id'), nullable=False)
+    switch_id = db.Column(db.Integer, db.ForeignKey('switch.id', ondelete='SET NULL'), nullable=True)
+    switch_name = db.Column(db.String(100))  # Store switch name for historical reference
+    switch_ip = db.Column(db.String(50))  # Store IP for historical reference
     alert_type = db.Column(db.String(50), nullable=False)
     severity = db.Column(db.String(20), nullable=False)  # info, warning, critical
     message = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     acknowledged = db.Column(db.Boolean, default=False)
-    
-    switch = db.relationship('Switch', backref='alerts', lazy=True)

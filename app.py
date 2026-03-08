@@ -78,10 +78,23 @@ def add_switch():
 
 @app.route('/switch/<int:switch_id>/delete', methods=['POST'])
 def delete_switch(switch_id):
-    """Delete a switch"""
+    """Delete a switch while preserving historical alerts"""
     switch = Switch.query.get_or_404(switch_id)
+    
+    # Update alerts to preserve them but remove switch reference
+    alerts = Alert.query.filter_by(switch_id=switch_id).all()
+    for alert in alerts:
+        alert.switch_name = switch.name
+        alert.switch_ip = switch.ip_address
+        alert.switch_id = None  # Remove the foreign key reference
+    
+    # Delete all related metrics (these can be deleted)
+    Metric.query.filter_by(switch_id=switch_id).delete()
+    
+    # Now delete the switch
     db.session.delete(switch)
     db.session.commit()
+    
     return redirect(url_for('switches'))
 
 @app.route('/alerts')
